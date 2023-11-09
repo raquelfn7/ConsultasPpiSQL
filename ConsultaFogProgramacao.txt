@@ -1,0 +1,8 @@
+SELECT tbPpiOficial.competencia, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, IIf([tbassistencia].[subgrupo]=906,[descricaoFormaOrganizacao],"SIHMC") AS fog, Sum([quantidadeProgramada]*([valorUnitarioFederal]+[valorUnitarioEstadual]+[valorUnitarioMunicipal])) AS valPPI, Sum(IIf([sadtFederal] Is Null,0,[sadtFederal])) AS SADT
+
+FROM ((tbMunicipio INNER JOIN (tbOrigem INNER JOIN ((tbPpiOficial INNER JOIN tbAssistencia ON tbPpiOficial.assistencia = tbAssistencia.idAssistencia) INNER JOIN tbFormaOrganizacao ON tbAssistencia.formaOrganizacao = tbFormaOrganizacao.idFormaOrganizacao) ON tbOrigem.idOrigem = tbPpiOficial.origem) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) INNER JOIN tbBloco ON tbPpiOficial.bloco = tbBloco.idBloco) LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial
+
+WHERE (((tbAssistencia.idAssistencia) In (3984,3985,3986,3987,3988,3989,3990,3991,3992,3993,3994,3995,3996,3997,3998,3999,4000,4001,4002,4003,4004,4005,4006,4007,4008,4009,4010,4011,4012,4013,4014,1592)))
+
+GROUP BY tbPpiOficial.competencia, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, IIf([tbassistencia].[subgrupo]=906,[descricaoFormaOrganizacao],"SIHMC")
+HAVING (((tbPpiOficial.atendimento) Not In (310000,319999,317777)));
