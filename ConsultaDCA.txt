@@ -1,0 +1,29 @@
+﻿SIH MÉDIA (0907, 0908, 0909, 0910, 0917):
+
+SELECT tbPpiOficial.competencia, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, "SIHMC" AS descricao, Sum(([quantidadeProgramada]*([valorUnitarioFederal]+[valorUnitarioEstadual]+[valorUnitarioMunicipal]))) AS valor, Sum(IIf([sadtFederal]<>0,[sadtFederaL],0)) AS SADT
+FROM (tbMunicipio INNER JOIN (tbPpiOficial INNER JOIN tbAssistencia ON tbPpiOficial.assistencia = tbAssistencia.idAssistencia) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial
+WHERE (((tbAssistencia.Subgrupo) In (907,908,909,910,917)))
+GROUP BY tbPpiOficial.competencia, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, "SIHMC";
+
+RECOMPOSIÇÃO (090609):
+
+SELECT tbPpiOficial.competencia, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, "Recomposição de valores do SIH-MC" AS descricao, Sum(([quantidadeProgramada]*([valorUnitarioFederal]+[valorUnitarioEstadual]+[valorUnitarioMunicipal]))) AS valor, Sum(IIf([sadtFederal]<>0,[sadtFederaL],0)) AS SADT
+FROM (tbMunicipio INNER JOIN (tbPpiOficial INNER JOIN tbAssistencia ON tbPpiOficial.assistencia = tbAssistencia.idAssistencia) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial
+WHERE (((tbAssistencia.formaOrganizacao)=90609))
+GROUP BY tbPpiOficial.competencia, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, "Recomposição de valores do SIH-MC";
+
+CONFERIR COM OS VALORES NO SITE DA PPI
+
+filtros: auditar 1 município por competência
+
+município de atendimento (foco de pesquisa)
+municipio de atendimento: nome do município
+grupo: 9
+subgrupo: os solicitados
+valor total - sadt de cada subgrupo
+soma os resultados
+
+recomposição
+grupo: 9
+subgrupo: 906
+fog: 90609
