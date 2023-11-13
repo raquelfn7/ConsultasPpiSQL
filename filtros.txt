@@ -1,6 +1,0 @@
-Filtros
-
-(((tbAssistencia.competenciaFinal=299912) And (tbAssistencia.subgrupo=906))) And (tbAssistencia.formaOrganizacao In (90627,90629,90630,90632,90633,90638))
-
-(((tbPpiOficial.assistencia=978))) And (tbPpiOficial.atendimento=312610)
-
