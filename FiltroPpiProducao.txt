@@ -1,3 +1,6 @@
+Escopo: filtros utilizados no programa PPIxPRODUÇÃO para confecção das bases para posterior 
+confecção de consultas relacionadas
+
 [SIHMedia]
 assistencia=990
 assistencia=991
