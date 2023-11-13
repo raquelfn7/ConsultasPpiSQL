@@ -1,6 +1,36 @@
-SQL PADRÃO PARA CONSULTA POR PROCEDIMENTO PACTUADO
+Escopo: SQL padrão para consulta por Procedimento Pactuado
 
-SELECT tbPpiOficial.competencia, tbPpiOficial.origem, tbOrigem.descricaoOrigem, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, tbAssistencia.formaOrganizacao, tbFormaOrganizacao.descricaoFormaOrganizacao, tbAssistencia.procedimento, tbProcedimento.descricaoProcedimento, Sum(tbPpiOficial.quantidadeProgramada) AS SomaDequantidadeProgramada, Sum(IIf([tbassistencia].[financiamento]=6,([quantidadeProgramada]*[valorUnitarioFederal]),0)) AS valPPI, Sum(viSadt.sadtFederal) AS SADT
-FROM ((((tbProcedimento RIGHT JOIN (tbAssistencia INNER JOIN tbPpiOficial ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) ON tbProcedimento.idProcedimento = tbAssistencia.procedimento) INNER JOIN tbOrigem ON tbPpiOficial.origem = tbOrigem.idOrigem) INNER JOIN tbMunicipio ON tbPpiOficial.atendimento = tbMunicipio.idMunicipio) INNER JOIN tbFormaOrganizacao ON tbAssistencia.formaOrganizacao = tbFormaOrganizacao.idFormaOrganizacao) LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial
-GROUP BY tbPpiOficial.competencia, tbPpiOficial.origem, tbOrigem.descricaoOrigem, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, tbAssistencia.formaOrganizacao, tbFormaOrganizacao.descricaoFormaOrganizacao, tbAssistencia.procedimento, tbProcedimento.descricaoProcedimento
+SELECT 
+  tbPpiOficial.competencia, 
+  tbPpiOficial.origem, 
+  tbOrigem.descricaoOrigem, 
+  tbPpiOficial.atendimento, 
+  tbMunicipio.descricaoMunicipio, 
+  tbAssistencia.formaOrganizacao, 
+  tbFormaOrganizacao.descricaoFormaOrganizacao, 
+  tbAssistencia.procedimento, 
+  tbProcedimento.descricaoProcedimento, 
+  Sum(tbPpiOficial.quantidadeProgramada) AS SomaDequantidadeProgramada, 
+  Sum(IIf([tbassistencia].[financiamento]=6,([quantidadeProgramada]*[valorUnitarioFederal]),0)) AS valPPI, 
+  Sum(viSadt.sadtFederal) AS SADT
+
+FROM ((((tbProcedimento 
+  RIGHT JOIN (tbAssistencia 
+  INNER JOIN tbPpiOficial ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) ON tbProcedimento.idProcedimento = tbAssistencia.procedimento) 
+  INNER JOIN tbOrigem ON tbPpiOficial.origem = tbOrigem.idOrigem) 
+  INNER JOIN tbMunicipio ON tbPpiOficial.atendimento = tbMunicipio.idMunicipio) 
+  INNER JOIN tbFormaOrganizacao ON tbAssistencia.formaOrganizacao = tbFormaOrganizacao.idFormaOrganizacao) 
+  LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial
+
+GROUP BY 
+  tbPpiOficial.competencia, 
+  tbPpiOficial.origem, 
+  tbOrigem.descricaoOrigem, 
+  tbPpiOficial.atendimento, 
+  tbMunicipio.descricaoMunicipio, 
+  tbAssistencia.formaOrganizacao, 
+  tbFormaOrganizacao.descricaoFormaOrganizacao, 
+  tbAssistencia.procedimento, 
+  tbProcedimento.descricaoProcedimento
+  
 HAVING (((tbPpiOficial.atendimento)=313190));
