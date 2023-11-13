@@ -1,0 +1,38 @@
+SELECT 
+  po.competencia,
+  po.atendimento, 
+  tbMunicipio.descricaoMunicipio,
+  tbAssistencia.formaOrganizacao, 
+  tbFormaOrganizacao.descricaoFormaOrganizacao, 
+  tbBloco.descricaoBloco, 
+  tbSistema.descricaoSistema, 
+  tbComplexidade.descricaoComplexidade, 
+  Sum(IIf(tbAssistencia.financiamento=6,po.quantidadeProgramada,0)) AS qtPPI,
+  Sum(IIf(tbAssistencia.financiamento=6,po.quantidadeProgramada*(po.valorUnitarioFederal+ po.valorUnitarioEstadual),0)) AS valPPI, 
+  Sum(po.valorFederalFES) AS valFES, 
+  Sum(IIf(isnull(viSadt.sadtFederal),0,viSadt.sadtFederal+viSadt.sadtEstadual)) AS sadt
+
+FROM ((((((((tbPpiOficial AS po 
+  INNER JOIN tbAssistencia ON po.assistencia = tbAssistencia.idAssistencia)  
+  INNER JOIN tbComplexidade ON tbComplexidade.idComplexidade = tbAssistencia.complexidade)
+  INNER JOIN tbInstrumentoRegistro ON tbInstrumentoRegistro.idInstrumentoRegistro = tbAssistencia.instrumentoRegistro)
+  INNER JOIN tbMunicipio ON tbMunicipio.idMunicipio = po.atendimento)
+  INNER JOIN tbOrigem ON tbOrigem.idOrigem = po.origem)
+  INNER JOIN tbFormaOrganizacao ON tbAssistencia.formaOrganizacao = tbFormaOrganizacao.idFormaOrganizacao) 
+  INNER JOIN tbBloco ON po.bloco = tbBloco.idBloco) 
+  INNER JOIN tbSistema ON tbInstrumentoRegistro.sistema = tbSistema.idSistema) 
+  LEFT JOIN viSadt ON po.idPpiOficial = viSadt.idPpiOficial 
+ 
+WHERE (po.assistencia IN (90626, 90649, 90640, 90637, 90641))
+
+GROUP BY 
+  po.competencia, 
+  po.atendimento, 
+  tbMunicipio.descricaoMunicipio, 
+  tbAssistencia.formaOrganizacao, 
+  tbFormaOrganizacao.descricaoFormaOrganizacao, 
+  tbBloco.descricaoBloco, 
+  tbSistema.descricaoSistema, 
+  tbComplexidade.descricaoComplexidade, 
+  tbComplexidade.idComplexidade;
+
