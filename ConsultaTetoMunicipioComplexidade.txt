@@ -1,8 +1,52 @@
-SELECT tbPpiOficial.competencia AS COMPETENCIA, tbPpiOficial.origem AS IBGE_ORIGEM, tbOrigem.descricaoOrigem AS ORIGEM, tbPpiOficial.atendimento AS IBGE_ATENDIMENTO, tbMunicipio.descricaoMunicipio AS ATENDIMENTO, tbAssistencia.formaOrganizacao AS FOG, tbFormaOrganizacao.descricaoFormaOrganizacao AS FORMA_ORGANIZAÇÃO, tbAssistencia.procedimento AS PROCEDIMENTO, tbBloco.descricaoBloco AS BLOCO, tbComplexidade.descricaoComplexidade AS COMPLEXIDADE, tbSistema.descricaoSistema AS SISTEMA, tbPpiOficial.quantidadeProgramada AS QTPPI, (([valorunitariofederal]+[valorunitarioestadual]+[valorunitariomunicipal])*[quantidadeprogramada]) AS VALPPI, [sadtfederal]+[sadtestadual]+[sadtmunicipal] AS SADTPPI
-FROM (tbSistema INNER JOIN (tbInstrumentoRegistro INNER JOIN (tbComplexidade INNER JOIN (tbBloco INNER JOIN (tbFormaOrganizacao INNER JOIN (tbProcedimento RIGHT JOIN (tbAssistencia INNER JOIN (tbMunicipio INNER JOIN (tbOrigem INNER JOIN tbPpiOficial ON tbOrigem.idOrigem = tbPpiOficial.origem) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) ON tbProcedimento.idProcedimento = tbAssistencia.procedimento) ON tbFormaOrganizacao.idFormaOrganizacao = tbAssistencia.formaOrganizacao) ON tbBloco.idBloco = tbPpiOficial.bloco) ON tbComplexidade.idComplexidade = tbAssistencia.complexidade) ON tbInstrumentoRegistro.idInstrumentoRegistro = tbAssistencia.instrumentoRegistro) ON tbSistema.idSistema = tbInstrumentoRegistro.sistema) LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial
-GROUP BY tbPpiOficial.competencia, tbPpiOficial.origem, tbOrigem.descricaoOrigem, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, tbAssistencia.formaOrganizacao, tbFormaOrganizacao.descricaoFormaOrganizacao, tbAssistencia.procedimento, tbBloco.descricaoBloco, tbComplexidade.descricaoComplexidade, tbSistema.descricaoSistema, tbPpiOficial.quantidadeProgramada, (([valorunitariofederal]+[valorunitarioestadual]+[valorunitariomunicipal])*[quantidadeprogramada]), [sadtfederal]+[sadtestadual]+[sadtmunicipal], tbComplexidade.idComplexidade, tbSistema.idSistema
+Escopo: consulta ao Teto (programação PPI) do município por Complexidade
+
+O código do Sistema está na tabela Instrumento de Registro
+No exemplo de consulta, o filtro está com 2 devido a solicitação ser para Hospitalar
+
+
+SELECT 
+  tbPpiOficial.competencia AS COMPETENCIA, 
+  tbPpiOficial.origem AS IBGE_ORIGEM, 
+  tbOrigem.descricaoOrigem AS ORIGEM, 
+  tbPpiOficial.atendimento AS IBGE_ATENDIMENTO, 
+  tbMunicipio.descricaoMunicipio AS ATENDIMENTO, 
+  tbAssistencia.formaOrganizacao AS FOG, 
+  tbFormaOrganizacao.descricaoFormaOrganizacao AS FORMA_ORGANIZAÇÃO, 
+  tbAssistencia.procedimento AS PROCEDIMENTO, 
+  tbBloco.descricaoBloco AS BLOCO, 
+  tbComplexidade.descricaoComplexidade AS COMPLEXIDADE, 
+  tbSistema.descricaoSistema AS SISTEMA, 
+  tbPpiOficial.quantidadeProgramada AS QTPPI, (([valorunitariofederal]+[valorunitarioestadual]+[valorunitariomunicipal])*[quantidadeprogramada]) AS VALPPI, [sadtfederal]+[sadtestadual]+[sadtmunicipal] AS SADTPPI
+
+FROM (tbSistema 
+  INNER JOIN (tbInstrumentoRegistro 
+  INNER JOIN (tbComplexidade 
+  INNER JOIN (tbBloco 
+  INNER JOIN (tbFormaOrganizacao 
+  INNER JOIN (tbProcedimento 
+  RIGHT JOIN (tbAssistencia 
+  INNER JOIN (tbMunicipio 
+  INNER JOIN (tbOrigem 
+    INNER JOIN tbPpiOficial ON tbOrigem.idOrigem = tbPpiOficial.origem) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) ON tbProcedimento.idProcedimento = tbAssistencia.procedimento) ON tbFormaOrganizacao.idFormaOrganizacao = tbAssistencia.formaOrganizacao) ON tbBloco.idBloco = tbPpiOficial.bloco) ON tbComplexidade.idComplexidade = tbAssistencia.complexidade) ON tbInstrumentoRegistro.idInstrumentoRegistro = tbAssistencia.instrumentoRegistro) ON tbSistema.idSistema = tbInstrumentoRegistro.sistema) 
+  LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial
+
+GROUP BY 
+  tbPpiOficial.competencia, 
+  tbPpiOficial.origem, 
+  tbOrigem.descricaoOrigem, 
+  tbPpiOficial.atendimento, 
+  tbMunicipio.descricaoMunicipio, 
+  tbAssistencia.formaOrganizacao, 
+  tbFormaOrganizacao.descricaoFormaOrganizacao, 
+  tbAssistencia.procedimento, 
+  tbBloco.descricaoBloco, 
+  tbComplexidade.descricaoComplexidade, 
+  tbSistema.descricaoSistema, 
+  tbPpiOficial.quantidadeProgramada, (([valorunitariofederal]+[valorunitarioestadual]+[valorunitariomunicipal])*[quantidadeprogramada]), [sadtfederal]+[sadtestadual]+[sadtmunicipal], 
+  tbComplexidade.idComplexidade, 
+  tbSistema.idSistema
+
 HAVING (((tbSistema.idSistema)=2))
+
 ORDER BY tbPpiOficial.origem, tbAssistencia.formaOrganizacao;
 
-SISTEMA ESTÁ NA TABELA INSTRUMENTO DE REGISTRO
-O SISTEMA ESTÁ FILTRADO 2 POR SER HOSPITALAR COMO FILTRO
