@@ -1,4 +1,28 @@
-SELECT tbPpiOficial.competencia, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, tbSubgrupo.grupo, tbAssistencia.subgrupo, Sum(tbPpiOficial.quantidadeProgramada) AS qtPPI, Sum(IIf([financiamento]=6,[quantidadeProgramada]*[valorUnitarioFederal],0)) AS valPPI, Sum(viSadt.sadtFederal) AS SomaDesadtFederal
-FROM ((tbSubgrupo INNER JOIN ((tbAssistencia INNER JOIN tbPpiOficial ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) INNER JOIN tbMunicipio ON tbPpiOficial.atendimento = tbMunicipio.idMunicipio) ON tbSubgrupo.idSubgrupo = tbAssistencia.subgrupo) INNER JOIN tbGestao ON tbPpiOficial.gestao = tbGestao.idGestao) LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial
-GROUP BY tbPpiOficial.competencia, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, tbSubgrupo.grupo, tbAssistencia.subgrupo, tbGestao.idGestao
-HAVING (((tbPpiOficial.atendimento)=314790) AND ((tbSubgrupo.grupo)=9) AND ((tbGestao.idGestao)=2));
+Escopo: consulta específica de programação por município com filtro para Grupo
+
+SELECT 
+  tbPpiOficial.competencia, 
+  tbPpiOficial.atendimento, 
+  tbMunicipio.descricaoMunicipio, 
+  tbSubgrupo.grupo, 
+  tbAssistencia.subgrupo, 
+  Sum(tbPpiOficial.quantidadeProgramada) AS qtPPI, 
+  Sum(IIf([financiamento]=6,[quantidadeProgramada]*[valorUnitarioFederal],0)) AS valPPI, 
+  Sum(viSadt.sadtFederal) AS SomaDesadtFederal
+
+FROM ((tbSubgrupo 
+  INNER JOIN ((tbAssistencia 
+  INNER JOIN tbPpiOficial ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) 
+  INNER JOIN tbMunicipio ON tbPpiOficial.atendimento = tbMunicipio.idMunicipio) ON tbSubgrupo.idSubgrupo = tbAssistencia.subgrupo) 
+  INNER JOIN tbGestao ON tbPpiOficial.gestao = tbGestao.idGestao) 
+  LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial
+
+WHERE (((tbPpiOficial.atendimento)=314790) AND ((tbSubgrupo.grupo)=9) AND ((tbGestao.idGestao)=2))
+
+GROUP BY 
+  tbPpiOficial.competencia, 
+  tbPpiOficial.atendimento, 
+  tbMunicipio.descricaoMunicipio, 
+  tbSubgrupo.grupo, 
+  tbAssistencia.subgrupo, 
+  tbGestao.idGestao;
