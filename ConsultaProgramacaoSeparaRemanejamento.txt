@@ -1,3 +1,45 @@
-SELECT txRemanejamento.competencia, txRemanejamento.separaRemanejamento, txRemanejamento.ordem, tbSeparaRemanejamento.descricaoSeparaRemanejamento, txRemanejamento.documento, tbDocumento.descricaoDocumento, tbOrigem.idOrigem, tbOrigem.descricaoOrigem, "0" & [tbAssistencia]![formaOrganizacao] AS forma_Organizacao, IIf([tbAssistencia]![financiamento]=6,"","(valor MAC referente SADT) ") & [descricaoFormaOrganizacao] AS descricaoFO, Format([procedimento],"0000000000") AS CodProcedimento, txRemanejamento.bloco, tbBloco.descricaoBloco, tbAssistencia.financiamento, tbGestao.descricaoGestao, txRemanejamento.atendimento, tbMunicipio.descricaoMunicipio AS descricaoAtendimento, txRemanejamento.cnes, tbCnes.descricaoUnidadeSaude, txRemanejamento.quantidadeAntes, Round(([ValorFederalAntes]*[QuantidadeAntes]*IIf([tbAssistencia]![financiamento]=6,1,0)),2) AS ValorAntesSemSadt, Round([sadtFederalAntes],2) AS ValorSadtAntes, Round(([ValorEstadualAntes]*[QuantidadeAntes]*IIf([tbAssistencia]![financiamento]=6,1,0)),2) AS EstadualAntesSemSadt, Round([sadtEstadualAntes],2) AS EstadualSadtAntes, txRemanejamento.quantidadeAgora AS QuantidadeNovo, Round(([ValorFederalAgora]*[QuantidadeAgora]*IIf([tbAssistencia]![financiamento]=6,1,0)),2) AS ValorNovoSemSadt, Round([sadtFederalAgora],2) AS ValorSadtNovo, Round(([ValorEstadualAgora]*[QuantidadeAgora]*IIf([tbAssistencia]![financiamento]=6,1,0)),2) AS EstadualNovoSemSadt, Round([sadtEstadualAgora],2) AS EstadualSadtNovo
-FROM ((((((tbBloco INNER JOIN (tbGestao INNER JOIN txRemanejamento ON tbGestao.idGestao = txRemanejamento.gestao) ON tbBloco.idBloco = txRemanejamento.bloco) INNER JOIN tbOrigem ON txRemanejamento.origem = tbOrigem.idOrigem) INNER JOIN tbMunicipio ON txRemanejamento.atendimento = tbMunicipio.idMunicipio) INNER JOIN tbSeparaRemanejamento ON txRemanejamento.separaRemanejamento = tbSeparaRemanejamento.idSeparaRemanejamento) INNER JOIN (tbAssistencia INNER JOIN tbFormaOrganizacao ON tbAssistencia.formaOrganizacao = tbFormaOrganizacao.idFormaOrganizacao) ON txRemanejamento.assistencia = tbAssistencia.idAssistencia) LEFT JOIN tbDocumento ON txRemanejamento.documento = tbDocumento.idDocumento) INNER JOIN tbCnes ON txRemanejamento.cnes = tbCnes.idCnes
-ORDER BY txRemanejamento.competencia, txRemanejamento.separaRemanejamento, txRemanejamento.ordem, txRemanejamento.origem, txRemanejamento.assistencia, txRemanejamento.bloco, txRemanejamento.atendimento, txRemanejamento.gestao;
+Escopo: consulta a programação PPI via pesquisa por documento (Documento/ Separa Remanejamento)
+
+
+SELECT 
+  txRemanejamento.competencia, 
+  txRemanejamento.separaRemanejamento, 
+  txRemanejamento.ordem, 
+  tbSeparaRemanejamento.descricaoSeparaRemanejamento, 
+  txRemanejamento.documento, 
+  tbDocumento.descricaoDocumento, 
+  tbOrigem.idOrigem, 
+  tbOrigem.descricaoOrigem, 
+  "0" & [tbAssistencia]![formaOrganizacao] AS forma_Organizacao, 
+  IIf([tbAssistencia]![financiamento]=6,"","(valor MAC referente SADT) ") & [descricaoFormaOrganizacao] AS descricaoFO, Format([procedimento],"0000000000") AS CodProcedimento, 
+  txRemanejamento.bloco, 
+  tbBloco.descricaoBloco, 
+  tbAssistencia.financiamento, 
+  tbGestao.descricaoGestao, 
+  txRemanejamento.atendimento, 
+  tbMunicipio.descricaoMunicipio AS descricaoAtendimento, 
+  txRemanejamento.cnes, 
+  tbCnes.descricaoUnidadeSaude, 
+  txRemanejamento.quantidadeAntes, Round(([ValorFederalAntes]*[QuantidadeAntes]*IIf([tbAssistencia]![financiamento]=6,1,0)),2) AS ValorAntesSemSadt, Round([sadtFederalAntes],2) AS ValorSadtAntes, Round(([ValorEstadualAntes]*[QuantidadeAntes]*IIf([tbAssistencia]![financiamento]=6,1,0)),2) AS EstadualAntesSemSadt, Round([sadtEstadualAntes],2) AS EstadualSadtAntes, 
+  txRemanejamento.quantidadeAgora AS QuantidadeNovo, Round(([ValorFederalAgora]*[QuantidadeAgora]*IIf([tbAssistencia]![financiamento]=6,1,0)),2) AS ValorNovoSemSadt, Round([sadtFederalAgora],2) AS ValorSadtNovo, Round(([ValorEstadualAgora]*[QuantidadeAgora]*IIf([tbAssistencia]![financiamento]=6,1,0)),2) AS EstadualNovoSemSadt, Round([sadtEstadualAgora],2) AS EstadualSadtNovo
+
+FROM ((((((tbBloco 
+  INNER JOIN (tbGestao 
+  INNER JOIN txRemanejamento ON tbGestao.idGestao = txRemanejamento.gestao) ON tbBloco.idBloco = txRemanejamento.bloco) 
+  INNER JOIN tbOrigem ON txRemanejamento.origem = tbOrigem.idOrigem) 
+  INNER JOIN tbMunicipio ON txRemanejamento.atendimento = tbMunicipio.idMunicipio) 
+  INNER JOIN tbSeparaRemanejamento ON txRemanejamento.separaRemanejamento = tbSeparaRemanejamento.idSeparaRemanejamento) 
+  INNER JOIN (tbAssistencia 
+  INNER JOIN tbFormaOrganizacao ON tbAssistencia.formaOrganizacao = tbFormaOrganizacao.idFormaOrganizacao) ON txRemanejamento.assistencia = tbAssistencia.idAssistencia) 
+  LEFT JOIN tbDocumento ON txRemanejamento.documento = tbDocumento.idDocumento) 
+  INNER JOIN tbCnes ON txRemanejamento.cnes = tbCnes.idCnes
+
+ORDER BY 
+  txRemanejamento.competencia, 
+  txRemanejamento.separaRemanejamento, 
+  txRemanejamento.ordem, 
+  txRemanejamento.origem, 
+  txRemanejamento.assistencia, 
+  txRemanejamento.bloco, 
+  txRemanejamento.atendimento, 
+  txRemanejamento.gestao;
