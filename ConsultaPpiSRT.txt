@@ -1,6 +1,40 @@
-Consulta PPI Basica SRT por municipio
+Escopo: consulta PPI básica com foco de pesquisa em SRT por municipio
 
-SELECT tbPpiOficial.competencia, tbPpiOficial.origem, tbOrigem.descricaoOrigem, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, tbAssistencia.formaOrganizacao, tbFormaOrganizacao.descricaoFormaOrganizacao, tbAssistencia.procedimento, tbComplexidade.descricaoComplexidade, tbSistema.descricaoSistema, Sum(IIf([tbassistencia].[financiamento]=6,[quantidadeProgramada],0)) AS qtPPI, Sum(IIf([tbassistencia].[financiamento]=6,[quantidadeProgramada]*([valorUnitarioFederal]+[valorUnitarioEstadual]),0)) AS ValPPI, Sum(IIf([tbassistencia].[financiamento]=6,[quantidadeProgramada]*[valorFederalFES],0)) AS valFES, Sum(IIf(([sadtFederal]+[sadtEstadual]) Is Not Null,[sadtFederal]+[sadtEstadual],0)) AS SADT
-FROM (((tbMunicipio INNER JOIN (tbFormaOrganizacao INNER JOIN (tbAssistencia INNER JOIN (tbOrigem INNER JOIN (tbPpiOficial LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial) ON tbOrigem.idOrigem = tbPpiOficial.origem) ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) ON tbFormaOrganizacao.idFormaOrganizacao = tbAssistencia.formaOrganizacao) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) INNER JOIN tbInstrumentoRegistro ON tbAssistencia.instrumentoRegistro = tbInstrumentoRegistro.idInstrumentoRegistro) INNER JOIN tbSistema ON tbInstrumentoRegistro.sistema = tbSistema.idSistema) INNER JOIN tbComplexidade ON tbAssistencia.complexidade = tbComplexidade.idComplexidade
-GROUP BY tbPpiOficial.competencia, tbPpiOficial.origem, tbOrigem.descricaoOrigem, tbPpiOficial.atendimento, tbMunicipio.descricaoMunicipio, tbAssistencia.formaOrganizacao, tbFormaOrganizacao.descricaoFormaOrganizacao, tbAssistencia.procedimento, tbComplexidade.descricaoComplexidade, tbSistema.descricaoSistema
-HAVING (((tbPpiOficial.atendimento)=315720));
+SELECT 
+  tbPpiOficial.competencia, 
+  tbPpiOficial.origem, 
+  tbOrigem.descricaoOrigem, 
+  tbPpiOficial.atendimento, 
+  tbMunicipio.descricaoMunicipio, 
+  tbAssistencia.formaOrganizacao, 
+  tbFormaOrganizacao.descricaoFormaOrganizacao, 
+  tbAssistencia.procedimento, 
+  tbComplexidade.descricaoComplexidade, 
+  tbSistema.descricaoSistema, 
+  Sum(IIf([tbassistencia].[financiamento]=6,[quantidadeProgramada],0)) AS qtPPI, 
+  Sum(IIf([tbassistencia].[financiamento]=6,[quantidadeProgramada]*([valorUnitarioFederal]+[valorUnitarioEstadual]),0)) AS ValPPI, 
+  Sum(IIf([tbassistencia].[financiamento]=6,[quantidadeProgramada]*[valorFederalFES],0)) AS valFES, 
+  Sum(IIf(([sadtFederal]+[sadtEstadual]) Is Not Null,[sadtFederal]+[sadtEstadual],0)) AS SADT
+
+FROM (((tbMunicipio 
+  INNER JOIN (tbFormaOrganizacao 
+  INNER JOIN (tbAssistencia 
+  INNER JOIN (tbOrigem 
+  INNER JOIN (tbPpiOficial 
+  LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial) ON tbOrigem.idOrigem = tbPpiOficial.origem) ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) ON tbFormaOrganizacao.idFormaOrganizacao = tbAssistencia.formaOrganizacao) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) INNER JOIN tbInstrumentoRegistro ON tbAssistencia.instrumentoRegistro = tbInstrumentoRegistro.idInstrumentoRegistro) 
+  INNER JOIN tbSistema ON tbInstrumentoRegistro.sistema = tbSistema.idSistema) 
+  INNER JOIN tbComplexidade ON tbAssistencia.complexidade = tbComplexidade.idComplexidade
+
+WHERE (((tbPpiOficial.atendimento)=315720))
+
+GROUP BY 
+  tbPpiOficial.competencia, 
+  tbPpiOficial.origem, 
+  tbOrigem.descricaoOrigem, 
+  tbPpiOficial.atendimento, 
+  tbMunicipio.descricaoMunicipio, 
+  tbAssistencia.formaOrganizacao, 
+  tbFormaOrganizacao.descricaoFormaOrganizacao, 
+  tbAssistencia.procedimento, 
+  tbComplexidade.descricaoComplexidade, 
+  tbSistema.descricaoSistema;
