@@ -7,6 +7,8 @@ SELECT
   tbPpiOficial.competencia,
   tbPpiOficial.atendimento, 
   tbMunicipio.descricaoMunicipio,
+  tbAssistencia.subgrupo,
+  tbSubgrupo.descricaoSubgrupo,
   tbAssistencia.formaOrganizacao, 
   tbFormaOrganizacao.descricaoFormaOrganizacao, 
   tbBloco.descricaoBloco, 
@@ -17,16 +19,17 @@ SELECT
   Sum(tbPpiOficial.valorFederalFES) AS valFES, 
   Sum(IIf((([sadtFederal]+[sadtEstadual]))<>0,(([sadtFederal]+[sadtEstadual])),0)) AS sadt
 
-FROM tbComplexidade 
-  INNER JOIN (((tbInstrumentoRegistro 
-  INNER JOIN ((((tbMunicipio 
-  INNER JOIN (tbOrigem 
-  INNER JOIN tbPpiOficial ON tbOrigem.idOrigem = tbPpiOficial.origem) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) 
-  INNER JOIN tbAssistencia ON tbPpiOficial.assistencia = tbAssistencia.idAssistencia) 
-  INNER JOIN tbFormaOrganizacao ON tbAssistencia.formaOrganizacao = tbFormaOrganizacao.idFormaOrganizacao) 
-  INNER JOIN tbBloco ON tbPpiOficial.bloco = tbBloco.idBloco) ON tbInstrumentoRegistro.idInstrumentoRegistro = tbAssistencia.instrumentoRegistro) 
+FROM (((((((((tbPpiOficial   
+  INNER JOIN tbAssistencia ON tbPpiOficial.assistencia = tbAssistencia.idAssistencia)
+  INNER JOIN tbComplexidade ON tbAssistencia.complexidade = tbComplexidade.idComplexidade)
+  INNER JOIN tbInstrumentoRegistro ON tbAssistencia.instrumentoRegistro = tbInstrumentoRegistro.idInstrumentoRegistro) 
+  INNER JOIN tbMunicipio ON tbPpiOficial.atendimento = tbMunicipio.idMunicipio)
+  INNER JOIN tbOrigem ON tbPpiOficial.origem = tbOrigem.idOrigem)
+  INNER JOIN tbFormaOrganizacao ON tbAssistencia.formaOrganizacao = tbFormaOrganizacao.idFormaOrganizacao)
+  INNER JOIN tbSubgrupo ON tbAssistencia.subgrupo = tbSubgrupo.idSubgrupo) 
+  INNER JOIN tbBloco ON tbPpiOficial.bloco = tbBloco.idBloco) 
   INNER JOIN tbSistema ON tbInstrumentoRegistro.sistema = tbSistema.idSistema) 
-  LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial) ON tbComplexidade.idComplexidade = tbAssistencia.complexidade
+  LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial 
 
 WHERE (tbBloco.rede IN (3)) 
 
@@ -34,6 +37,8 @@ GROUP BY
   tbPpiOficial.competencia, 
   tbPpiOficial.atendimento, 
   tbMunicipio.descricaoMunicipio, 
+  tbAssistencia.subgrupo,
+  tbSubgrupo.descricaoSubgrupo,
   tbAssistencia.formaOrganizacao, 
   tbFormaOrganizacao.descricaoFormaOrganizacao, 
   tbBloco.descricaoBloco, 
