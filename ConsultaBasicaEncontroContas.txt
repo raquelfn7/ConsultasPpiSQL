@@ -29,7 +29,7 @@ FROM tbComplexidade
   INNER JOIN tbSistema ON tbInstrumentoRegistro.sistema = tbSistema.idSistema) 
   LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial) ON tbComplexidade.idComplexidade = tbAssistencia.complexidade
 
-WHERE (po.assistencia IN (90626, 90649, 90640, 90637, 90641))
+WHERE (tbPpiOficial.assistencia IN (90626, 90649, 90640, 90637, 90641))
 
 GROUP BY 
   tbPpiOficial.competencia, 
