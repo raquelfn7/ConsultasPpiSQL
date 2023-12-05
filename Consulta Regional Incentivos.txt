@@ -1,0 +1,49 @@
+Consulta Regional Incentivos
+
+Escopo: consulta para teste da funcionalidade Incentivos nível Unidade Regional
+
+SELECT 
+   tbCompetencia.competenciaAtual, 
+   tbRegionalSaude.idRegionalSaude, 
+   tbRegionalSaude.descricaoRegionalSaude, 
+   tbProgramacaoPrestador.atendimento, 
+   tbProgramacaoPrestador.bloco, 
+   tbAssistencia.subgrupo, 
+   tbAssistencia.formaOrganizacao, 
+   tbFormaOrganizacao.descricaoFormaOrganizacao, 
+   tbAssistenciaBloco.representacaoFisica, 
+   IIf([representacaoFisica]=4,[quantidadeProgramada],0) AS QTD1, 
+   Sum(tbProgramacaoPrestador.quantidadeProgramada) AS QTD2, 
+   Sum([valorUnitarioFederal]*[quantidadeProgramada]) AS Federal, 
+   Sum([valorUnitarioEstadual]*[quantidadeProgramada]) AS Estadual, 
+   Sum([valorUnitarioMunicipal]*[quantidadeProgramada]) AS Municipal, 
+   Sum([valorFederalFES]*[quantidadeProgramada]) AS FES,  
+   Sum([quantidadeProgramada]*([valorUnitarioFederal]+[valorUnitarioEstadual]+[valorunitarioMunicipal])) AS Total
+
+FROM 
+   tbCompetencia, 
+   tbAssistenciaBloco 
+   INNER JOIN ((tbRegionalSaude 
+   INNER JOIN tbMunicipio ON tbRegionalSaude.idRegionalSaude = tbMunicipio.regionalSaude) 
+   INNER JOIN ((tbFormaOrganizacao 
+   INNER JOIN tbAssistencia ON tbFormaOrganizacao.idFormaOrganizacao = tbAssistencia.formaOrganizacao) 
+   INNER JOIN tbProgramacaoPrestador ON tbAssistencia.idAssistencia = tbProgramacaoPrestador.assistencia) ON tbMunicipio.idMunicipio = tbProgramacaoPrestador.atendimento) ON (tbAssistenciaBloco.bloco = tbProgramacaoPrestador.bloco) AND (tbAssistenciaBloco.assistencia = tbProgramacaoPrestador.assistencia)
+
+WHERE 
+   (((tbCompetencia.competenciaAtual)>=[tbProgramacaoPrestador].[competenciaInicial] And (tbCompetencia.competenciaAtual)<=[tbProgramacaoPrestador].[competenciaFinal]))
+
+GROUP BY 
+   tbCompetencia.competenciaAtual, 
+   tbRegionalSaude.idRegionalSaude, 
+   tbRegionalSaude.descricaoRegionalSaude, 
+   tbProgramacaoPrestador.atendimento, 
+   tbProgramacaoPrestador.bloco, 
+   tbAssistencia.subgrupo, 
+   tbAssistencia.formaOrganizacao, 
+   tbFormaOrganizacao.descricaoFormaOrganizacao, 
+   tbAssistenciaBloco.representacaoFisica, 
+   IIf([representacaoFisica]=4,[quantidadeProgramada],0)
+
+HAVING (((tbAssistencia.subgrupo)=905));
+
+
