@@ -1,0 +1,32 @@
+Consulta Levantamento TETO PPI
+
+Escopo: Levantamento do TETO PPI para atender a demanda da LAI - Lei de Acesso a Informação 
+
+Parâmetros solicitados:
+- Somente Recurso Federal
+- Macro Região como Atendimento
+- Situação <> (diferente de ) 128, retira as programações sem recurso financeiro
+- Condicional no Valor = soma do produto entre Valor Federal vezes quantidade programada, quando o financiamento for igual a 6 (Recurso Federal).
+
+
+SELECT 
+    tbMunicipio.macrorregiao, 
+    tbMacrorregiao.descricaoMacrorregiao, 
+    Sum(IIf([financiamento]=6,([quantidadeprogramada]*[valorunitariofederal]),0)) AS Valor, 
+    Sum(viSadt.sadtFederal) AS SADT
+
+FROM 
+    tbAssistencia 
+    INNER JOIN (tbMacrorregiao 
+    INNER JOIN (tbMunicipio 
+    INNER JOIN (tbPpiOficial 
+    LEFT JOIN viSadt ON tbPpiOficial.idPpiOficial = viSadt.idPpiOficial) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) ON tbMacrorregiao.idMacrorregiao = tbMunicipio.macrorregiao) ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia
+
+WHERE (((tbPpiOficial.situacao)<>128))
+
+GROUP BY 
+    tbMunicipio.macrorregiao, 
+    tbMacrorregiao.descricaoMacrorregiao;
+
+
+
