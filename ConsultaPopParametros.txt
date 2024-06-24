@@ -1,0 +1,71 @@
+Escopo: consultas SQL utilizadas como exercício do POP-DPPI-016-PARÂMETROS NA PPI, executados durante a explicação do vídeo "Parâmetros".
+
+viPopParametro:
+
+	SELECT 
+		tbAssistencia.idAssistencia, 
+		tbAssistencia.nivelRegionalizacao, 
+		tbOrigemRegraParametro.origem, Sum(tbPopulacao.quantidade) AS SomaDequantidade, 
+		tbAssistencia.parametroAssistencial, 
+		tbRegraPopulacional.metaFisicaMinima
+
+	FROM tbRegraPopulacionalPopulacao 
+		INNER JOIN (((tbRegraPopulacional 
+		INNER JOIN tbAssistencia ON tbRegraPopulacional.idRegraPopulacional = tbAssistencia.regraPopulacional) 
+		INNER JOIN tbOrigemRegraParametro ON tbAssistencia.nivelRegionalizacao = tbOrigemRegraParametro.nivelRegionalizacao) 
+		INNER JOIN tbPopulacao ON (tbPopulacao.populacaoFonte = tbRegraPopulacional.populacaoFonte) AND (tbOrigemRegraParametro.municipio = tbPopulacao.municipio)) ON (tbRegraPopulacionalPopulacao.sexo = tbPopulacao.sexo) AND (tbRegraPopulacionalPopulacao.regraPopulacional = tbRegraPopulacional.idRegraPopulacional) AND (tbRegraPopulacionalPopulacao.faixaEtaria = tbPopulacao.faixaEtaria)
+
+	GROUP BY 
+		tbAssistencia.idAssistencia, 
+		tbAssistencia.nivelRegionalizacao,
+ 		tbOrigemRegraParametro.origem, 
+		tbAssistencia.parametroAssistencial, 
+		tbRegraPopulacional.metaFisicaMinima
+
+	HAVING 
+		(((tbAssistencia.idAssistencia)=1));
+
+
+viMetaFisica:
+
+	SELECT 
+		viPopParametro.idAssistencia, 
+		viPopParametro.origem
+
+	FROM 
+		viPopParametro
+
+	WHERE 
+		(((viPopParametro.idAssistencia)=1) AND ((viPopParametro.origem)=1));
+
+
+
+viPpi:
+
+	SELECT 
+		tbPpiOficial.origem, 
+		tbPpiOficial.assistencia, Sum(tbPpiOficial.quantidadeProgramada) AS SomaDequantidadeProgramada
+
+	FROM 
+		tbPpiOficial
+
+	GROUP BY 
+		tbPpiOficial.origem, 
+		tbPpiOficial.assistencia
+
+	HAVING 
+		(((tbPpiOficial.assistencia)=1));
+
+
+ConsultaParâmetros:
+
+	SELECT
+		viPpi.origem, 
+		viPpi.assistencia, 
+		viPpi.SomaDequantidadeProgramada, 
+		viMetaFisica.metaFisica
+
+	FROM viPpi 
+
+	INNER JOIN 
+		viMetaFisica ON (viPpi.assistencia = viMetaFisica.idAssistencia) AND (viPpi.origem = viMetaFisica.origem);
