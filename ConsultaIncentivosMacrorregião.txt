@@ -1,0 +1,26 @@
+Consulta: Incentivos Macrorregião
+
+Escopo: consulta para teste da funcionalidade Incentivos nível Macrorregião. É necessário ter a ConsultaRegionalIncentivos no mesmo Banco.
+
+SELECT 
+	ConsultaRegionalIncentivos.competenciaAtual, 
+	ConsultaRegionalIncentivos.atendimento, 
+	tbMunicipio.descricaoMunicipio, 
+	ConsultaRegionalIncentivos.subgrupo, 
+	ConsultaRegionalIncentivos.formaOrganizacao, 
+	ConsultaRegionalIncentivos.descricaoFormaOrganizacao, Sum(IIf([representacaoFisica]=4,[QTD1],[QTD2])) AS Quantidade, Sum(ConsultaRegionalIncentivos.Federal) AS SomaDeFederal, Sum(ConsultaRegionalIncentivos.Estadual) AS SomaDeEstadual, Sum(ConsultaRegionalIncentivos.Municipal) AS SomaDeMunicipal, Sum(ConsultaRegionalIncentivos.FES) AS SomaDeFES, Sum(ConsultaRegionalIncentivos.Total) AS SomaDeTotal
+
+FROM 
+	tbMunicipio
+	INNER JOIN ConsultaRegionalIncentivos ON tbMunicipio.idMunicipio = ConsultaRegionalIncentivos.atendimento
+
+GROUP BY 
+	ConsultaRegionalIncentivos.competenciaAtual, 
+	ConsultaRegionalIncentivos.atendimento, 
+	tbMunicipio.descricaoMunicipio, 
+	ConsultaRegionalIncentivos.subgrupo, 
+	ConsultaRegionalIncentivos.formaOrganizacao,
+	ConsultaRegionalIncentivos.descricaoFormaOrganizacao
+
+HAVING 
+	(((ConsultaRegionalIncentivos.subgrupo)=905));
