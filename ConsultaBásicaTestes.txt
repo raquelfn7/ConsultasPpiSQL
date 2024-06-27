@@ -1,0 +1,91 @@
+Consulta Básica para Testes
+
+Escopo: consulta básica para testes
+
+Simples:
+SELECT 
+	tbPpiOficial.origem, 
+	tbOrigem.descricaoOrigem, 
+	tbPpiOficial.atendimento, 
+	tbMunicipio.descricaoMunicipio, 
+	tbMunicipio.macrorregiao, 
+	tbMacrorregiao.descricaoMacrorregiao, 
+	tbMunicipio.microrregiao, 
+	tbMicrorregiao.descricaoMicrorregiao, 
+	tbSistema.idSistema, 
+	tbPpiOficial.quantidadeProgramada, [quantidadeprogramada]*[valorUnitarioFederal] AS Vfederal, [quantidadeprogramada]*[valorUnitarioEstadual] AS VEstadual, [quantidadeprogramada]*[valorFederalFES] AS VFES, ([quantidadeprogramada]*[valorUnitarioFederal])+([quantidadeprogramada]*[valorUnitarioEstadual])+([quantidadeprogramada]*[valorFederalFES]) AS Total
+
+FROM 
+	(tbInstrumentoRegistro 
+	INNER JOIN (tbOrigem 
+	INNER JOIN ((tbMicrorregiao 
+	INNER JOIN (tbMacrorregiao 
+	INNER JOIN tbMunicipio ON tbMacrorregiao.idMacrorregiao = tbMunicipio.macrorregiao) ON tbMicrorregiao.idMicrorregiao = tbMunicipio.microrregiao) 
+	INNER JOIN (tbAssistencia 
+	INNER JOIN tbPpiOficial ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) ON tbOrigem.idOrigem = tbPpiOficial.origem) ON tbInstrumentoRegistro.instrumentoRegistroSigtap = tbAssistencia.instrumentoRegistro) 
+	INNER JOIN tbSistema ON tbInstrumentoRegistro.sistema = tbSistema.idSistema;
+
+
+Detalhada:
+
+Principal:
+SELECT 
+	tbCompetencia.competenciaAtual, 
+	tbMunicipio.macrorregiao, 
+	tbMacrorregiao.descricaoMacrorregiao, 
+	tbProgramacaoPrestador.atendimento, 
+	tbProgramacaoPrestador.bloco, 
+	tbAssistencia.subgrupo, 
+	tbAssistencia.formaOrganizacao, 
+	tbFormaOrganizacao.descricaoFormaOrganizacao, 
+	tbAssistenciaBloco.representacaoFisica, IIf([representacaoFisica]=4,[quantidadeProgramada],0) AS QTD1, Sum(tbProgramacaoPrestador.quantidadeProgramada) AS QTD2, Sum([valorUnitarioFederal]*[quantidadeProgramada]) AS Federal, Sum([valorUnitarioEstadual]*[quantidadeProgramada]) AS Estadual, Sum([valorUnitarioMunicipal]*[quantidadeProgramada]) AS Municipal, Sum([valorFederalFES]*[quantidadeProgramada]) AS FES, Sum([quantidadeProgramada]*([valorUnitarioFederal]+[valorUnitarioEstadual]+[valorunitarioMunicipal])) AS Total
+
+FROM 
+	tbCompetencia, 
+	(tbAssistenciaBloco 
+	INNER JOIN (tbMunicipio 
+	INNER JOIN ((tbFormaOrganizacao 
+	INNER JOIN tbAssistencia ON tbFormaOrganizacao.idFormaOrganizacao = tbAssistencia.formaOrganizacao) 
+	INNER JOIN tbProgramacaoPrestador ON tbAssistencia.idAssistencia = tbProgramacaoPrestador.assistencia) ON tbMunicipio.idMunicipio = tbProgramacaoPrestador.atendimento) ON (tbAssistenciaBloco.bloco = tbProgramacaoPrestador.bloco) AND (tbAssistenciaBloco.assistencia = tbProgramacaoPrestador.assistencia)) 
+	INNER JOIN tbMacrorregiao ON tbMunicipio.macrorregiao = tbMacrorregiao.idMacrorregiao
+
+WHERE 
+	(((tbCompetencia.competenciaAtual)>=[tbProgramacaoPrestador].[competenciaInicial] And (tbCompetencia.competenciaAtual)<=[tbProgramacaoPrestador].[competenciaFinal]))
+
+GROUP BY 
+	tbCompetencia.competenciaAtual, 
+	tbMunicipio.macrorregiao, 
+	tbMacrorregiao.descricaoMacrorregiao, 
+	tbProgramacaoPrestador.atendimento, 
+	tbProgramacaoPrestador.bloco, 
+	tbAssistencia.subgrupo, 
+	tbAssistencia.formaOrganizacao, 
+	tbFormaOrganizacao.descricaoFormaOrganizacao, 
+	tbAssistenciaBloco.representacaoFisica, IIf([representacaoFisica]=4,[quantidadeProgramada],0)
+
+HAVING 
+	(((tbAssistencia.subgrupo)=905));
+
+Final:
+SELECT 
+	ConsultaRegionalIncentivos.competenciaAtual, 
+	ConsultaRegionalIncentivos.atendimento, 
+	tbMunicipio.descricaoMunicipio, 
+	ConsultaRegionalIncentivos.subgrupo, 
+	ConsultaRegionalIncentivos.formaOrganizacao, 
+	ConsultaRegionalIncentivos.descricaoFormaOrganizacao, Sum(IIf([representacaoFisica]=4,[QTD1],[QTD2])) AS Quantidade, Sum(ConsultaRegionalIncentivos.Federal) AS SomaDeFederal, Sum(ConsultaRegionalIncentivos.Estadual) AS SomaDeEstadual, Sum(ConsultaRegionalIncentivos.Municipal) AS SomaDeMunicipal, Sum(ConsultaRegionalIncentivos.FES) AS SomaDeFES, Sum(ConsultaRegionalIncentivos.Total) AS SomaDeTotal
+
+FROM 
+	tbMunicipio 
+	INNER JOIN ConsultaRegionalIncentivos ON tbMunicipio.idMunicipio = ConsultaRegionalIncentivos.atendimento
+
+GROUP BY 
+	ConsultaRegionalIncentivos.competenciaAtual, 
+	ConsultaRegionalIncentivos.atendimento, 
+	tbMunicipio.descricaoMunicipio, 
+	ConsultaRegionalIncentivos.subgrupo, 
+	ConsultaRegionalIncentivos.formaOrganizacao, 
+	ConsultaRegionalIncentivos.descricaoFormaOrganizacao
+
+HAVING 
+	(((ConsultaRegionalIncentivos.subgrupo)=905));
