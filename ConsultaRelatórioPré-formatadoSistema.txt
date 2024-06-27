@@ -1,0 +1,28 @@
+Consulta: Relatório Pré-formatado Sistema
+
+Escopo: consulta para teste da funcionalidade Relatório Pré-formatado nível Sistema (pode ser aproveitada para Complexidade).
+
+SELECT 
+	tbPpiOficial.origem, 
+	tbOrigem.descricaoOrigem, 
+	tbPpiOficial.atendimento, 
+	tbMunicipio.descricaoMunicipio, 
+	tbMunicipio.regionalSaude, 
+	tbMunicipio.macrorregiao, 
+	tbMacrorregiao.descricaoMacrorregiao, 
+	tbMunicipio.microrregiao, 
+	tbMicrorregiao.descricaoMicrorregiao, 
+	tbSistema.idSistema, 
+	tbAssistencia.grupo, 
+	tbAssistencia.subgrupo, 
+	tbPpiOficial.quantidadeProgramada, [quantidadeprogramada]*[valorUnitarioFederal] AS Vfederal, [quantidadeprogramada]*[valorUnitarioEstadual] AS VEstadual, [quantidadeprogramada]*[valorFederalFES] AS VFES, ([quantidadeprogramada]*[valorUnitarioFederal])+([quantidadeprogramada]*[valorUnitarioEstadual])+([quantidadeprogramada]*[valorFederalFES]) AS Total
+
+FROM 
+	(tbInstrumentoRegistro 
+	INNER JOIN (tbOrigem 
+	INNER JOIN ((tbMicrorregiao 
+	INNER JOIN (tbMacrorregiao 
+	INNER JOIN tbMunicipio ON tbMacrorregiao.idMacrorregiao = tbMunicipio.macrorregiao) ON tbMicrorregiao.idMicrorregiao = tbMunicipio.microrregiao) 
+	INNER JOIN (tbAssistencia 
+	INNER JOIN tbPpiOficial ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) ON tbOrigem.idOrigem = tbPpiOficial.origem) ON tbInstrumentoRegistro.idInstrumentoRegistro = tbAssistencia.instrumentoRegistro) 
+	INNER JOIN tbSistema ON tbInstrumentoRegistro.sistema = tbSistema.idSistema;
