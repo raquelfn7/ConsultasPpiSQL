@@ -1,0 +1,23 @@
+Consulta: Relatório Pré-formatado Procedimento
+
+Escopo: consulta para teste da funcionalidade Relatório Pré-formatado nível Procedimento.
+
+SELECT 
+	tbPpiOficial.origem, 
+	tbOrigem.descricaoOrigem, 
+	tbOrigem.regionalSaude, 
+	tbOrigem.macrorregiao, 
+	tbOrigem.microrregiao, 
+	tbAssistencia.grupo, 
+	tbAssistencia.subgrupo, 
+	tbAssistencia.formaOrganizacao, 
+	tbFormaOrganizacao.descricaoFormaOrganizacao, 
+	tbAssistencia.procedimento, 
+	tbProcedimento.descricaoProcedimento, [quantidadeprogramada]*[valorUnitarioFederal] AS Vfederal, tbPpiOficial.[quantidadeprogramada]*[valorUnitarioEstadual] AS VEstadual, [quantidadeprogramada]*[valorFederalFES] AS VFES, ([quantidadeprogramada]*[valorUnitarioFederal])+([quantidadeprogramada]*[valorUnitarioEstadual])+([quantidadeprogramada]*[valorFederalFES]) AS Total
+
+FROM 
+	tbFormaOrganizacao 
+	INNER JOIN (tbOrigem 
+	INNER JOIN (tbProcedimento 
+	INNER JOIN (tbAssistencia 
+	INNER JOIN tbPpiOficial ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) ON tbProcedimento.idProcedimento = tbAssistencia.procedimento) ON tbOrigem.idOrigem = tbPpiOficial.origem) ON tbFormaOrganizacao.idFormaOrganizacao = tbAssistencia.formaOrganizacao;
