@@ -1,0 +1,43 @@
+Consulta: Teste Quantidade PPI
+
+Escopo: consulta inicial para teste da funcionalidades no Site PPI.
+
+SELECT 
+	tbAssistencia.detalharPrestador, 
+	tbAssistencia.financiamento, 
+	tbCompetencia.competenciaAtual, 
+	tbRegionalSaude.idRegionalSaude, 
+	tbRegionalSaude.descricaoRegionalSaude, 
+	tbPpiOficial.atendimento, 
+	tbMunicipio.descricaoMunicipio, 
+	tbAssistencia.subgrupo, 
+	tbAssistencia.formaOrganizacao, 
+	tbFormaOrganizacao.descricaoFormaOrganizacao, 
+	tbAssistenciaBloco.representacaoFisica, Sum(tbPpiOficial.quantidadeProgramada) AS qtd, Sum([valorUnitarioFederal]*[quantidadeProgramada]) AS Federal, Sum([valorUnitarioEstadual]*[quantidadeProgramada]) AS Estadual, Sum([valorUnitarioMunicipal]*[quantidadeProgramada]) AS Municipal, Sum([valorFederalFES]*[quantidadeProgramada]) AS FES, Sum([quantidadeProgramada]*([valorUnitarioFederal]+[valorUnitarioEstadual]+[valorunitarioMunicipal])) AS Total
+
+
+FROM 
+	tbAssistenciaBloco 
+	INNER JOIN ((tbRegionalSaude 
+	INNER JOIN tbMunicipio ON tbRegionalSaude.idRegionalSaude = tbMunicipio.regionalSaude) 
+	INNER JOIN (tbCompetencia 
+	INNER JOIN ((tbFormaOrganizacao 
+	INNER JOIN tbAssistencia ON tbFormaOrganizacao.idFormaOrganizacao = tbAssistencia.formaOrganizacao) 
+	INNER JOIN tbPpiOficial ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia) ON tbCompetencia.competenciaAtual = tbPpiOficial.competencia) ON tbMunicipio.idMunicipio = tbPpiOficial.atendimento) ON (tbAssistenciaBloco.bloco = tbPpiOficial.bloco) AND (tbAssistenciaBloco.assistencia = tbPpiOficial.assistencia)
+
+GROUP BY 
+	tbAssistencia.detalharPrestador, 
+	tbAssistencia.financiamento, 
+	tbCompetencia.competenciaAtual, 
+	tbRegionalSaude.idRegionalSaude, 
+	tbRegionalSaude.descricaoRegionalSaude, 
+	tbPpiOficial.atendimento, 
+	tbMunicipio.descricaoMunicipio, 
+	tbAssistencia.subgrupo, 
+	tbAssistencia.formaOrganizacao, 
+	tbFormaOrganizacao.descricaoFormaOrganizacao, 
+	tbAssistenciaBloco.representacaoFisica
+
+HAVING 
+	(((tbAssistencia.subgrupo)=905));
+
