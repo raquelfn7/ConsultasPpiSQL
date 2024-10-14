@@ -1,0 +1,36 @@
+Consulta de Teste de "Consulta Procedimento"
+
+Escopo: consulta de teste de funcionalidade do Site PPI: Consulta Procedimento > Foco Lista de Procedimentos por Subgrupo ou FOG
+
+SELECT 
+	tbAssistencia.grupo, 
+	tbAssistencia.subgrupo, 
+	tbAssistencia.formaOrganizacao, 
+	tbFormaOrganizacao.descricaoFormaOrganizacao, 
+	tbRegistroProcedimento.procedimento, 
+	tbProcedimento.descricaoProcedimento
+
+FROM 
+	(((((tbProcedimento 
+	INNER JOIN (tbRegistroProcedimento 
+	INNER JOIN tbAssistencia 
+		ON (tbRegistroProcedimento.assistencia = tbAssistencia.idAssistencia) 
+		AND (tbRegistroProcedimento.competenciaFinal = tbAssistencia.competenciaFinal)) 
+		ON (tbProcedimento.competenciaFinal = tbRegistroProcedimento.competenciaFinal) 
+		AND (tbProcedimento.idProcedimento = tbRegistroProcedimento.procedimento)) 
+	INNER JOIN tbFormaOrganizacao ON tbAssistencia.formaOrganizacao = tbFormaOrganizacao.idFormaOrganizacao) 
+	INNER JOIN tbComplexidade ON tbAssistencia.complexidade = tbComplexidade.idComplexidade) 
+	INNER JOIN tbInstrumentoRegistro ON tbAssistencia.instrumentoRegistro = tbInstrumentoRegistro.idInstrumentoRegistro) 
+	INNER JOIN tbSistema ON tbInstrumentoRegistro.sistema = tbSistema.idSistema) 
+	INNER JOIN tbPpiOficial ON tbAssistencia.idAssistencia = tbPpiOficial.assistencia
+
+WHERE 
+(((tbAssistencia.competenciaFinal)=299912) AND ((tbProcedimento.competenciaFinal)=299912))
+
+GROUP BY 
+	tbAssistencia.grupo, 
+	tbAssistencia.subgrupo, 
+	tbAssistencia.formaOrganizacao, 
+	tbFormaOrganizacao.descricaoFormaOrganizacao, 
+	tbRegistroProcedimento.procedimento, 
+	tbProcedimento.descricaoProcedimento;
