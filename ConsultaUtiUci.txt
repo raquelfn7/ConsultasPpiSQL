@@ -1,0 +1,65 @@
+Consulta UTI/UCI
+
+Escopo: consulta para teste da funcionalidade UTI/UCI do Site PPI Oficial 
+
+
+SELECT 
+	tbProgramacaoPrestador.cnes, 
+	tbCnes.descricaoUnidadeSaude, 
+	tbProgramacaoPrestador.atendimento, 
+	tbMunicipio.descricaoMunicipio, 
+	tbMunicipio.regionalSaude, 
+	tbRegionalSaude.descricaoRegionalSaude, 
+	tbMunicipio.macrorregiao, 
+	tbMacrorregiao.descricaoMacrorregiaoAbreviada, 
+	tbMunicipio.microrregiao, 
+	tbMicrorregiao.descricaoMicrorregiao, 
+	tbAssistencia.procedimento, 
+	tbAssistencia.formaOrganizacao, 
+	tbFormaOrganizacao.descricaoFormaOrganizacao, 
+	tbProcedimento.descricaoProcedimento, 
+	tbBloco.idBloco, 
+	tbBloco.descricaoBloco, 
+	tbFormulaCalculo.descricaoFormula, 
+	Sum(tbProgramacaoPrestador.quantidadeProgramada) AS SomaDequantidadeProgramada, 
+	tbProgramacaoPrestador.valorUnitarioFederal, 
+	Sum([quantidadeProgramada]*[valorUnitarioFederal]) AS ValorTotal
+
+
+FROM 
+	tbMicrorregiao 
+	INNER JOIN (tbMacrorregiao 
+	INNER JOIN (tbRegionalSaude 
+	INNER JOIN (tbProcedimento 
+	RIGHT JOIN (tbFormaOrganizacao 
+	INNER JOIN (tbFormulaCalculo 
+	INNER JOIN (((tbBloco 
+	INNER JOIN (tbMunicipio 
+	INNER JOIN (tbCnes 
+	INNER JOIN tbProgramacaoPrestador ON tbCnes.idCnes = tbProgramacaoPrestador.cnes) ON tbMunicipio.idMunicipio = tbProgramacaoPrestador.atendimento) ON tbBloco.idBloco = tbProgramacaoPrestador.bloco) 
+	INNER JOIN tbAssistenciaBloco ON tbBloco.idBloco = tbAssistenciaBloco.bloco) 
+	INNER JOIN tbAssistencia ON (tbProgramacaoPrestador.assistencia = tbAssistencia.idAssistencia) AND (tbAssistenciaBloco.assistencia = tbAssistencia.idAssistencia)) ON tbFormulaCalculo.idFormulaCalculo = tbAssistenciaBloco.formulaCalculo) ON tbFormaOrganizacao.idFormaOrganizacao = tbAssistencia.formaOrganizacao) ON tbProcedimento.idProcedimento = tbAssistencia.procedimento) ON tbRegionalSaude.idRegionalSaude = tbMunicipio.regionalSaude) ON tbMacrorregiao.idMacrorregiao = tbMunicipio.macrorregiao) ON tbMicrorregiao.idMicrorregiao = tbMunicipio.microrregiao
+
+GROUP BY 
+	tbProgramacaoPrestador.cnes,
+	tbCnes.descricaoUnidadeSaude, 
+	tbProgramacaoPrestador.atendimento, 
+	tbMunicipio.descricaoMunicipio, 
+	tbMunicipio.regionalSaude, 
+	tbRegionalSaude.descricaoRegionalSaude, 
+	tbMunicipio.macrorregiao, 
+	tbMacrorregiao.descricaoMacrorregiaoAbreviada, 
+	tbMunicipio.microrregiao, 
+	tbMicrorregiao.descricaoMicrorregiao, 
+	tbAssistencia.procedimento, 
+	tbAssistencia.formaOrganizacao, 
+	tbFormaOrganizacao.descricaoFormaOrganizacao, 
+	tbProcedimento.descricaoProcedimento, 
+	tbBloco.idBloco, 
+	tbBloco.descricaoBloco, 
+	tbFormulaCalculo.descricaoFormula, 
+	tbProgramacaoPrestador.valorUnitarioFederal, 
+	tbProgramacaoPrestador.competenciaFinal
+
+
+HAVING (((tbAssistencia.formaOrganizacao)=80201) AND ((tbProgramacaoPrestador.competenciaFinal)=299912));
