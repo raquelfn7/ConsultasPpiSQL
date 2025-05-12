@@ -1,0 +1,109 @@
+Cálculo Parâmetro
+Como operador do sistema com acesso para fechamento do teto
+Quero acionar o cálculo Parâmetro.
+Para realizar o cálculo das metas físicas parametrizadas.
+
+Critérios de aceite
+1.Deverão já estar cadastrados os dados nas tabelas: FONTE, FONTE POPULACIONAL, POPULAÇÃO, REGRA POPULACIONAL, VÍNCULO DA REGRA POPULACIONAL, ASSISTÊNCIA PARÂMETRO, MUNICÍPIO, MICRO-REGIÃO, MACRO-REGIÃO.
+
+2.Criar a View (ASSISTENCIA_NIVEL) da tabela ASSISTENCIA PARAMETRO com as colunas Nível de Regionalização e Regra Populacional agrupadas e filtradas pelos campos: Programado PPI igual a "SIM" e Competência Inicial menor ou igual a competência do sistema e competência final maior ou igual a competência do sistema e Regra Populacional maior que 0.
+
+	SELECT 
+		tbAssistencia.nivelRegionalizacao,
+		tbAssistencia.regraPopulacional
+	FROM 
+		tbAssistencia, 
+		tbCompetencia
+	WHERE 
+	(((tbAssistencia.competenciaInicial)<=[competenciaAtual]) AND ((tbAssistencia.competenciaFinal)>=[competenciaAtual]) AND ((tbAssistencia.programadoPpi)=Yes) AND ((tbAssistencia.regraPopulacional)>0))
+	GROUP BY 
+		tbAssistencia.nivelRegionalizacao, 
+		tbAssistencia.regraPopulacional;
+
+3.Criar a View (POPULACAO_ALVO) das tabelas MUNICIPIO, POPULACAO, REGRA POPULACIONAL, VINCULO REGRA POPULACIONAL e a view ASSISTENCIA_NIVEL .
+
+3.1.Colunas da View POPULACAO_ALVO:
+3.1.1 <ASSISTENCIA_NIVEL.Nível de Regionalização>
+3.1.2. <ASSISTENCIA_NIVEL.Regra Populacional>
+3.1.3. Criar o campo "Origem" conforme definição abaixo:
+	caso o <ASSISTENCIA_NIVEL.Nível de Regionalização> igual 1 o valor será <Município.CodigoMunicípio>
+	caso o <ASSISTENCIA_NIVEL.Nível de Regionalização> igual 2 o valor será<Município.Micro Região>
+	caso o <ASSISTENCIA_NIVEL.Nível de Regionalização> igual 3 o valor será <Município.Macro Região>
+	caso o <ASSISTENCIA_NIVEL.Nível de Regionalização> igual 4 o valor será 310000
+	caso contrário o valor do campo "Origem" será igual 0.
+3.1.4. Criar o campo "Populacao_Alvo" que será o somatório da <POPULACAO.QUANTIDADE>
+
+	SELECT 
+		ASSISTENCIA_NIVEL.nivelRegionalizacao, 
+		ASSISTENCIA_NIVEL.regraPopulacional,
+		IIf([ASSISTENCIA_NIVEL].[nivelRegionalizacao]=1,[idMunicipio],
+		IIf([ASSISTENCIA_NIVEL].[nivelRegionalizacao]=2,[microrregiao],
+		IIf([ASSISTENCIA_NIVEL].[nivelRegionalizacao]=3,[macrorregiao],
+		IIf([ASSISTENCIA_NIVEL].[nivelRegionalizacao]=4,310000,0)))) AS Origem, Sum(tbPopulacao.quantidade) AS PopulacaoAlvo
+	FROM 
+		(((tbRegraPopulacional 
+	INNER JOIN 
+		tbRegraPopulacionalPopulacao ON tbRegraPopulacional.idRegraPopulacional = tbRegraPopulacionalPopulacao.regraPopulacional) 
+		INNER JOIN ASSISTENCIA_NIVEL ON tbRegraPopulacional.idRegraPopulacional = ASSISTENCIA_NIVEL.regraPopulacional) 
+	INNER JOIN 
+		tbPopulacao ON (tbPopulacao.populacaoFonte = tbRegraPopulacional.populacaoFonte) AND (tbRegraPopulacionalPopulacao.sexo = tbPopulacao.sexo) AND (tbRegraPopulacionalPopulacao.faixaEtaria = tbPopulacao.faixaEtaria)) 
+	INNER JOIN
+		 tbMunicipio ON tbPopulacao.municipio = tbMunicipio.idMunicipio
+	WHERE 
+		(((tbMunicipio.classificacaoPDR) In (1,2,3,4)) AND ((tbMunicipio.estado)=31))
+	GROUP BY 
+		ASSISTENCIA_NIVEL.nivelRegionalizacao, ASSISTENCIA_NIVEL.regraPopulacional,
+		IIf([ASSISTENCIA_NIVEL].[nivelRegionalizacao]=1,[idMunicipio],
+		IIf([ASSISTENCIA_NIVEL].[nivelRegionalizacao]=2,[microrregiao],
+		IIf([ASSISTENCIA_NIVEL].[nivelRegionalizacao]=3,[macrorregiao],
+		IIf([ASSISTENCIA_NIVEL].[nivelRegionalizacao]=4,310000,0))));
+
+
+3.2. Relacionamento das views e das tabelas:
+3.2.1. View ASSISTENCIA_NIVEL com a tabela REGRA POPULACIONAL onde <ASSISTENCIA_NIVEL.CODIGOREGRAPOPULACIONAL> igual <REGRA_POPULACIONAL.CodigoRegraPopulacional>
+3.2.2. Tabela REGRA POPULACIONAL com a tabela VÍNCULO DA REGRA POPULACIONAL onde <REGRA_POPULACIONAL.CodigoRegraPopulacional> igual ao <VÍNCULO DA REGRA POPULACIONAL.CODIGOREGRAPOPULACIONAL>
+3.2.3. Tabela VÍNCULO DA REGRA POPULACIONAL com a tabela POPULACAO onde <VÍNCULO DA REGRA POPULACIONAL.SEXO> igual <POPULACAO.SEXO> e <VÍNCULO DA REGRA POPULACIONAL.FAIXAETARIA> igual <POPULACAO.FAIXAETARIA>
+3.2.4. Tabela REGRA POPULACIONAL com a tabela POPULACAO onde igual <POPULACAO.FONTEPOPULACIONAL>
+3.2.5. Tabela POPULACAO com a tabela MUNICIPIO onde <POPULACAO.MUNICIPIO> igual <MUNICIPIO.CODIGOMUNICIPIO>
+
+
+3.3. Filtros da view:
+	3.3.1. <MUNICIPIO.CLASSIFICACAOPDR> igual 1, 2, 3 ou 4
+	3.3.2. <MUNICIPIO.ESTADO> igual "31"
+
+3.4. Agrupamento da view conforme os itens: 3.1.1, 3.1.2 e 3.1.3
+
+4.	Criar a view PARAMETRO_RESULTADO da view POPULACAO_ALVO e das tabelas ASSISTENCIA PARAMETRO, REGRA POPULACIONAL
+4.1. Cálculo da meta física aplicando o parâmetro:
+4.1.1. Calcular <POPULACAO_ALVO.POPULACAO_ALVO> multiplicado por <Assistencia_Parametro.ParametroAssistencia>
+4.1.2. Arredondar com zero casas decimais o item 4.1.1
+4.1.3. Calcular <RegraPopulacional.Multiplicador> multiplicado pelo item 4.1.2 
+4.1.4. Arredondar com zero casas decimais o item 4.1.3
+
+4.2. Campos da view PARAMETRO_RESULTADO
+4.2.1. ASSISTENCIA PARAMETRO.CODIGOASSISTENCIA
+4.2.2. <POPULACAO_ALVO.ORIGEM>
+4.2.3. Criar o campo "Meta Física" conforme descrito abaixo:
+	Caso o item 4.1 seja menor que <RegraPopulacional.MetaFisicaMinima> o valor será <RegraPopulacional.MetaFisicaMinima>.
+	Caso contrário, o valor será o item 4.1
+
+	SELECT 
+		tbAssistencia.idAssistencia, 
+		Populacao_Alvo.Origem, 	IIf(Round(Round([POPULACAO_ALVO].[POPULACAOALVO]*[tbAssistencia].[ParametroAssistencial],0)*[tbRegraPopulacional].[Multiplicador],0<[tbRegraPopulacional].[MetaFisicaMinima],[tbRegraPopulacional].[MetaFisicaMinima],Round(Round([POPULACAO_ALVO].[POPULACAOALVO]*[tbAssistencia].[ParametroAssistencial],0)*[tbRegraPopulacional].[Multiplicador],0)) AS MetaFisica
+	FROM 
+		tbCompetencia, (Populacao_Alvo 
+	INNER JOIN 
+		tbAssistencia ON (Populacao_Alvo.regraPopulacional = tbAssistencia.regraPopulacional) AND (Populacao_Alvo.nivelRegionalizacao = tbAssistencia.nivelRegionalizacao)) INNER JOIN tbRegraPopulacional ON tbAssistencia.regraPopulacional = tbRegraPopulacional.idRegraPopulacional
+	WHERE 
+		(((tbAssistencia.programadoPpi)=Yes) AND ((tbAssistencia.competenciaInicial)<=[competenciaAtual]) AND ((tbAssistencia.competenciaFinal)>=[competenciaAtual]));
+
+
+4.3. Relacionamento das views e das tabelas:
+4.3.1 View POPULACAO_ALVO com a tabela ASSISTENCIA_PARAMETRO onde <POPULACAO_ALVO.Nivel_Regionalizacao> igual <ASSISTENCIA_PARAMETRO.Nivel_Regionalizacao>
+e <POPULACAO_ALVO.Regra_Populacional> igual <ASSISTENCIA_PARAMETRO.Regra_Populacional>
+4.3.2 tabela ASSISTENCIA_PARAMETRO com a tabela REGRA_POPULACIONAL onde <ASSISTENCIA_PARAMETRO.Regra_Populacional> igual <REGRA_POPULACIONAL.CodigoRegraPopulacional>
+
+4.4. Filtros da view:
+4.4.1. <ASSISTENCIA_PARAMETRO.Programado_PPI> igual “SIM”
+4.4.2. <ASSISTENCIA_PARAMETRO.Competencia_Inicial> Menor ou igual <Competencia Sistema>
+4.4.3. <ASSISTENCIA_PARAMETRO.Competencia_Final> Maior ou igual <Competencia Sistema>
